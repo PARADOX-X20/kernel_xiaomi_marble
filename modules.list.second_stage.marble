@@ -1,0 +1,5 @@
+qcom_pm8008-regulator.ko
+gt9916r.ko
+qcom-hv-haptics.ko
+fpc1540.ko
+goodix_3626.ko
