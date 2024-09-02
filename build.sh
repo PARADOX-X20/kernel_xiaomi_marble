@@ -93,6 +93,10 @@ case "$TARGET" in
         DTB_WILDCARD="ukee"
         DTBO_WILDCARD="marble-sm7475-pm8008-overlay"
         ;;
+    "cupid" )
+        DTB_WILDCARD="waipio"
+        DTBO_WILDCARD="cupid-sm8450-pm8008-overlay"
+        ;;
 esac
 
 export PATH="$TC_DIR/bin:$PREBUILTS_DIR/bin:$PATH"
