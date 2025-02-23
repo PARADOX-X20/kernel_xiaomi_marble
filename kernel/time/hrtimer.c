@@ -980,7 +980,6 @@ static int enqueue_hrtimer(struct hrtimer *timer,
 			   enum hrtimer_mode mode)
 {
 	debug_activate(timer, mode);
-	WARN_ON_ONCE(!base->cpu_base->online);
 
 	base->cpu_base->active_bases |= 1 << base->index;
 
@@ -2074,15 +2073,6 @@ int hrtimers_prepare_cpu(unsigned int cpu)
 	}
 
 	cpu_base->cpu = cpu;
-	hrtimer_cpu_base_init_expiry_lock(cpu_base);
-	return 0;
-}
-
-int hrtimers_cpu_starting(unsigned int cpu)
-{
-	struct hrtimer_cpu_base *cpu_base = this_cpu_ptr(&hrtimer_bases);
-
-	/* Clear out any left over state from a CPU down operation */
 	cpu_base->active_bases = 0;
 	cpu_base->hres_active = 0;
 	cpu_base->hang_detected = 0;
@@ -2090,7 +2080,7 @@ int hrtimers_cpu_starting(unsigned int cpu)
 	cpu_base->softirq_next_timer = NULL;
 	cpu_base->expires_next = KTIME_MAX;
 	cpu_base->softirq_expires_next = KTIME_MAX;
-	cpu_base->online = 1;
+	hrtimer_cpu_base_init_expiry_lock(cpu_base);
 	return 0;
 }
 
@@ -2126,22 +2116,29 @@ static void migrate_hrtimer_list(struct hrtimer_clock_base *old_base,
 	}
 }
 
-int hrtimers_cpu_dying(unsigned int dying_cpu)
+int hrtimers_dead_cpu(unsigned int scpu)
 {
 	struct hrtimer_cpu_base *old_base, *new_base;
-	int i, ncpu = cpumask_first(cpu_active_mask);
+	int i;
 
-	tick_cancel_sched_timer(dying_cpu);
+	BUG_ON(cpu_online(scpu));
+	tick_cancel_sched_timer(scpu);
 
-	old_base = this_cpu_ptr(&hrtimer_bases);
-	new_base = &per_cpu(hrtimer_bases, ncpu);
-
+	/*
+	 * this BH disable ensures that raise_softirq_irqoff() does
+	 * not wakeup ksoftirqd (and acquire the pi-lock) while
+	 * holding the cpu_base lock
+	 */
+	local_bh_disable();
+	local_irq_disable();
+	old_base = &per_cpu(hrtimer_bases, scpu);
+	new_base = this_cpu_ptr(&hrtimer_bases);
 	/*
 	 * The caller is globally serialized and nobody else
 	 * takes two locks at once, deadlock is not possible.
 	 */
-	raw_spin_lock(&old_base->lock);
-	raw_spin_lock_nested(&new_base->lock, SINGLE_DEPTH_NESTING);
+	raw_spin_lock(&new_base->lock);
+	raw_spin_lock_nested(&old_base->lock, SINGLE_DEPTH_NESTING);
 
 	for (i = 0; i < HRTIMER_MAX_CLOCK_BASES; i++) {
 		migrate_hrtimer_list(&old_base->clock_base[i],
@@ -2152,14 +2149,15 @@ int hrtimers_cpu_dying(unsigned int dying_cpu)
 	 * The migration might have changed the first expiring softirq
 	 * timer on this CPU. Update it.
 	 */
-	__hrtimer_get_next_event(new_base, HRTIMER_ACTIVE_SOFT);
-	/* Tell the other CPU to retrigger the next event */
-	smp_call_function_single(ncpu, retrigger_next_event, NULL, 0);
+	hrtimer_update_softirq_timer(new_base, false);
 
-	raw_spin_unlock(&new_base->lock);
-	old_base->online = 0;
 	raw_spin_unlock(&old_base->lock);
+	raw_spin_unlock(&new_base->lock);
 
+	/* Check, if we got expired work to do */
+	__hrtimer_peek_ahead_timers();
+	local_irq_enable();
+	local_bh_enable();
 	return 0;
 }
 
@@ -2168,7 +2166,6 @@ int hrtimers_cpu_dying(unsigned int dying_cpu)
 void __init hrtimers_init(void)
 {
 	hrtimers_prepare_cpu(smp_processor_id());
-	hrtimers_cpu_starting(smp_processor_id());
 	open_softirq(HRTIMER_SOFTIRQ, hrtimer_run_softirq);
 }
 
