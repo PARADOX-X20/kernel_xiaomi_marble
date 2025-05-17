@@ -7,6 +7,8 @@
 #include <linux/msm_ep_pcie.h>
 #include <linux/ipc_logging.h>
 #include <linux/msm_mhi_dev.h>
+#include <linux/sched.h>
+#include <linux/smp.h>
 
 /**
  * MHI control data structures alloted by the host, including
@@ -120,8 +122,8 @@ struct mhi_dev_gen_ctx {
 /* Transfer ring element */
 struct mhi_dev_transfer_ring_element {
 	uint64_t				data_buf_ptr;
-	uint32_t				len:16;
-	uint32_t				res1:16;
+	uint32_t				len:24;
+	uint32_t				res1:8;
 	uint32_t				chain:1;
 	uint32_t				res2:7;
 	uint32_t				ieob:1;
@@ -185,8 +187,7 @@ enum mhi_dev_cmd_completion_code {
 /* Transfer completion event */
 struct mhi_dev_event_ring_transfer_completion {
 	uint64_t				ptr;
-	uint32_t				len:16;
-	uint32_t				res1:8;
+	uint32_t				len:24;
 	enum mhi_dev_cmd_completion_code	code:8;
 	uint32_t				res2:16;
 	enum mhi_dev_ring_element_type_id	type:8;
@@ -696,12 +697,13 @@ extern void *mhi_ipc_log;
 
 #define mhi_log(_msg_lvl, _msg, ...) do { \
 	if (_msg_lvl >= mhi_msg_lvl) { \
-		pr_err("[0x%x %s] "_msg, bhi_imgtxdb, \
-				__func__, ##__VA_ARGS__); \
+		pr_err("[0x%x %s][CPU:%d][%s] "_msg, bhi_imgtxdb, \
+				__func__, smp_processor_id(), current->comm, ##__VA_ARGS__);\
 	} \
 	if (mhi_ipc_log && (_msg_lvl >= mhi_ipc_msg_lvl)) { \
 		ipc_log_string(mhi_ipc_log,                     \
-		"[0x%x %s] " _msg, bhi_imgtxdb, __func__, ##__VA_ARGS__);     \
+		"[0x%x %s][CPU:%d][%s] " _msg, bhi_imgtxdb, __func__,\
+		smp_processor_id(), current->comm, ##__VA_ARGS__);\
 	} \
 } while (0)
 
