@@ -67,6 +67,7 @@ VDLKM_DIR="$KERNEL_DIR/vendor_dlkm"
 DEFCONFIG="gki_defconfig"
 DEFCONFIGS="vendor/waipio_GKI.config \
 vendor/xiaomi_GKI.config \
+vendor/addon.config \
 vendor/debugfs.config"
 
 MODULES_SRC="../sm8450-modules/qcom/opensource"
@@ -118,11 +119,11 @@ mkdir -p out
 m $DEFCONFIG
 m ./scripts/kconfig/merge_config.sh $DEFCONFIGS vendor/${TARGET}_GKI.config
 scripts/config --file out/.config \
-    --set-str LOCALVERSION "-aospa-gki"
+    --set-str LOCALVERSION "-Chandelier"
 $NO_LTO && (
     scripts/config --file out/.config \
         -d LTO_CLANG_FULL -e LTO_NONE \
-        --set-str LOCALVERSION "-aospa-gki-nolto"
+        --set-str LOCALVERSION "-Chandelier"
     echo -e "\nDisabled LTO!"
 )
 
