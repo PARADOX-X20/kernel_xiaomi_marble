@@ -167,3 +167,6 @@ sphinx_*/
 # Build artifacts
 out/
 *-modules/
+
+#build log
+log.txt
