@@ -4,6 +4,10 @@
 # Copyright (C) 2024 Adithya R.
 
 SECONDS=0 # start builtin bash timer
+LOG_FILE="log.txt"
+# Membersihkan file log sebelumnya di awal eksekusi
+> "$LOG_FILE"
+
 KP_ROOT="$(realpath ../..)"
 SRC_ROOT="$HOME/pa"
 TC_DIR="$KP_ROOT/prebuilts-master/clang/host/linux-x86/clang-r416183b"
@@ -102,11 +106,15 @@ esac
 
 export PATH="$TC_DIR/bin:$PREBUILTS_DIR/bin:$PATH"
 
+# Fungsi 'make' yang dimodifikasi untuk mencatat error ke log.txt
 function m() {
+    # Stderr (aliran error) dialihkan ke 'tee' yang akan menampilkannya di konsol
+    # dan sekaligus menyimpannya ke dalam file log.
+    # Jika 'make' gagal, skrip akan langsung berhenti.
     make -j$(nproc --all) O=out ARCH=arm64 LLVM=1 LLVM_IAS=1 \
         DTC_EXT="$PREBUILTS_DIR/bin/dtc" \
         DTC_OVERLAY_TEST_EXT="$PREBUILTS_DIR/bin/ufdt_apply_overlay" \
-        TARGET_PRODUCT=$TARGET $@ || exit $?
+        TARGET_PRODUCT=$TARGET $@ 2> >(tee -a "$LOG_FILE") || exit $?
 }
 
 $DO_CLEAN && (
@@ -150,17 +158,18 @@ mv  out/arch/arm64/boot/dts/vendor/qcom/$DTB_WILDCARD.dtb \
     out/arch/arm64/boot/dts/vendor/qcom/$DTBO_WILDCARD.dtbo \
     out/dtbs-base
 rm -f out/arch/arm64/boot/dts/vendor/qcom/*.dtbo
-../../build/android/merge_dtbs.py out/dtbs-base out/arch/arm64/boot/dts/vendor/qcom/ out/dtbs || exit $?
+# Mencatat error dari skrip python jika ada
+../../build/android/merge_dtbs.py out/dtbs-base out/arch/arm64/boot/dts/vendor/qcom/ out/dtbs 2> >(tee -a "$LOG_FILE") || exit $?
 
 echo -e "\nCopying files...\n"
 
 # rm -rf AnyKernel3
 # if [ -d "$AK3_DIR" ]; then
-# 	cp -r $AK3_DIR AnyKernel3
-# 	git -C AnyKernel3 checkout marble &> /dev/null
+#   cp -r $AK3_DIR AnyKernel3
+#   git -C AnyKernel3 checkout marble &> /dev/null
 # elif ! git clone -q https://github.com/ghostrider-reborn/AnyKernel3 -b marble; then
-# 	echo -e "\nAnyKernel3 repo not found locally and couldn't clone from GitHub! Aborting..."
-# 	exit 1
+#   echo -e "\nAnyKernel3 repo not found locally and couldn't clone from GitHub! Aborting..."
+#   exit 1
 # fi
 # KERNEL_COPY_TO="AnyKernel3"
 # DTB_COPY_TO="AnyKernel3/dtb"
@@ -180,7 +189,8 @@ else
 fi
 echo "Copied dtb(s) to $DTB_COPY_TO."
 
-mkdtboimg.py create $DTBO_COPY_TO --page_size=4096 out/dtbs/*.dtbo
+# Mencatat error dari skrip python jika ada
+mkdtboimg.py create $DTBO_COPY_TO --page_size=4096 out/dtbs/*.dtbo 2> >(tee -a "$LOG_FILE") || exit $?
 echo "Generated dtbo.img to $DTBO_COPY_TO".
 
 first_stage_modules="$(cat modules.list.msm.waipio)"
