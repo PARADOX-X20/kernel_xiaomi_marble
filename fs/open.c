@@ -414,14 +414,14 @@ static long do_faccessat(int dfd, const char __user *filename, int mode, int fla
 	unsigned int lookup_flags = LOOKUP_FOLLOW;
 	const struct cred *old_cred = NULL;
 
-#ifdef CONFIG_KSU_SUSFS_SUS_SU
-	if (susfs_is_sus_su_hooks_enabled) {
-		ksu_handle_faccessat(&dfd, &filename, &mode, NULL);
-	}
-#endif
-
 #ifdef CONFIG_KSU_MANUAL_HOOK
 	ksu_handle_faccessat(&dfd, &filename, &mode, NULL);
+#endif
+
+#ifdef CONFIG_KSU_SUSFS_SUS_SU
+	if (likely(susfs_is_sus_su_hooks_enabled)) {
+		ksu_handle_faccessat(&dfd, &filename, &mode, NULL);
+	}
 #endif
 
 	if (mode & ~S_IRWXO)	/* where's F_OK, X_OK, W_OK, R_OK? */
@@ -503,7 +503,6 @@ SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
 #endif
 	return do_faccessat(dfd, filename, mode, 0);
 }
-
 
 SYSCALL_DEFINE4(faccessat2, int, dfd, const char __user *, filename, int, mode,
 		int, flags)
