@@ -127,11 +127,11 @@ mkdir -p out
 m $DEFCONFIG
 m ./scripts/kconfig/merge_config.sh $DEFCONFIGS vendor/${TARGET}_GKI.config
 scripts/config --file out/.config \
-    --set-str LOCALVERSION "-Chandelier"
+    --set-str LOCALVERSION "-Lytherion-v1.1"
 $NO_LTO && (
     scripts/config --file out/.config \
         -d LTO_CLANG_FULL -e LTO_NONE \
-        --set-str LOCALVERSION "-Chandelier"
+        --set-str LOCALVERSION "-Lytherion-v1.1"
     echo -e "\nDisabled LTO!"
 )
 
