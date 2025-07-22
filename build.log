@@ -1,0 +1,20 @@
+../arch/arm64/Makefile:25: ld does not support --fix-cortex-a53-843419; kernel may be susceptible to erratum
+  GEN     Makefile
+  CC      scripts/mod/empty.o
+  CC      scripts/mod/devicetable-offsets.s
+  MKELF   scripts/mod/elfconfig.h
+  HOSTCC  scripts/mod/modpost.o
+  HOSTCC  scripts/mod/sumversion.o
+  HOSTCC  scripts/mod/file2alias.o
+  HOSTLD  scripts/mod/modpost
+  CC      kernel/bounds.s
+  CALL    ../scripts/atomic/check-atomics.sh
+  CC      arch/arm64/kernel/asm-offsets.s
+  CALL    ../scripts/checksyscalls.sh
+  CC      arch/arm64/kernel/vdso/vgettimeofday.o
+  LD      arch/arm64/kernel/vdso/vdso.so.dbg
+ld: unrecognised emulation mode: aarch64linux
+Supported emulations: elf_x86_64 elf32_x86_64 elf_i386 elf_iamcu i386pep i386pe
+make[2]: *** [../arch/arm64/kernel/vdso/Makefile:58: arch/arm64/kernel/vdso/vdso.so.dbg] Error 1
+make[1]: *** [../arch/arm64/Makefile:194: vdso_prepare] Error 2
+make: *** [Makefile:196: __sub-make] Error 2

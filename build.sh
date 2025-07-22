@@ -16,7 +16,7 @@ PREBUILTS_DIR="$KP_ROOT/prebuilts/kernel-build-tools/linux-x86"
 DO_CLEAN=false
 NO_LTO=false
 ONLY_CONFIG=false
-TARGET=
+TARGET=sm8450
 DTB_WILDCARD="*"
 DTBO_WILDCARD="*"
 
@@ -48,7 +48,7 @@ if ! source .build.rc || [ -z "$SRC_ROOT" ]; then
     exit 1
 fi
 
-KERNEL_DIR="$SRC_ROOT/device/xiaomi/$TARGET-kernel"
+KERNEL_DIR="$SRC_ROOT/pronoy/android_kernel_xiaomi_sm8450"
 
 if [ ! -d "$KERNEL_DIR" ]; then
     echo "$KERNEL_DIR does not exist!"
@@ -74,24 +74,6 @@ vendor/xiaomi_GKI.config \
 vendor/addon.config \
 vendor/debugfs.config"
 
-MODULES_SRC="../sm8450-modules/qcom/opensource"
-MODULES="mmrm-driver \
-audio-kernel \
-camera-kernel \
-cvp-kernel \
-dataipa/drivers/platform/msm \
-datarmnet/core \
-datarmnet-ext/aps \
-datarmnet-ext/offload \
-datarmnet-ext/shs \
-datarmnet-ext/perf \
-datarmnet-ext/perf_tether \
-datarmnet-ext/sch \
-datarmnet-ext/wlan \
-display-drivers/msm \
-eva-kernel \
-video-driver \
-wlan/qcacld-3.0/.qca6490"
 
 case "$TARGET" in
     "marble" )
@@ -138,7 +120,7 @@ $NO_LTO && (
 $ONLY_CONFIG && exit
 
 echo -e "\nBuilding kernel...\n"
-m Image modules dtbs
+m Image modules
 rm -rf out/modules
 m INSTALL_MOD_PATH=modules INSTALL_MOD_STRIP=1 modules_install
 
@@ -187,7 +169,8 @@ else
     rm -f $DTB_COPY_TO
     cat out/dtbs/*.dtb >> $DTB_COPY_TO
 fi
-echo "Copied dtb(s) to $DTB_COPY_TO."
+echo "Copied dtbs to $DTB_COPY_TO"
+
 
 # Mencatat error dari skrip python jika ada
 mkdtboimg.py create $DTBO_COPY_TO --page_size=4096 out/dtbs/*.dtbo 2> >(tee -a "$LOG_FILE") || exit $?
@@ -250,5 +233,9 @@ sed -E -i 's|([^: ]*/)([^/]*\.ko)([:]?)([ ]\|$)|/vendor_dlkm/lib/modules/\2\3\4|
 # cd ..
 # rm -rf AnyKernel3
 
-echo -e "\nCompleted in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
+minutes=$((SECONDS / 60))
+seconds=$((SECONDS % 60))
+echo
+echo "Completed in ${minutes} minute(s) and ${seconds} second(s)!"
+
 # echo "$(realpath $ZIPNAME)"
