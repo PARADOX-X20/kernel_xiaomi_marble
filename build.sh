@@ -6,8 +6,10 @@ LOG_FILE="log.txt"
 # Membersihkan file log sebelumnya di awal eksekusi
 > "$LOG_FILE"
 
-KP_ROOT="$(realpath ../..)"
-SRC_ROOT="$HOME/pa"
+# Get the directory where the script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+KP_ROOT="$SCRIPT_DIR/../.."
 TC_DIR="$KP_ROOT/prebuilts-master/clang/host/linux-x86/clang-r416183b"
 PREBUILTS_DIR="$KP_ROOT/prebuilts/kernel-build-tools/linux-x86"
 
@@ -41,12 +43,13 @@ if [ -z "$TARGET" ]; then
     exit 1
 fi
 
-if ! source .build.rc || [ -z "$SRC_ROOT" ]; then
-    echo -e "Create a .build.rc file here and define\nSRC_ROOT=<path/to/aospa/source>"
-    exit 1
-fi
+# Remove .build.rc and SRC_ROOT dependency
+# if ! source .build.rc || [ -z "$SRC_ROOT" ]; then
+#     echo -e "Create a .build.rc file here and define\nSRC_ROOT=<path/to/aospa/source>"
+#     exit 1
+# fi
 
-KERNEL_DIR="$SRC_ROOT/pronoy/android_kernel_xiaomi_sm8450"
+KERNEL_DIR="$SCRIPT_DIR"
 
 if [ ! -d "$KERNEL_DIR" ]; then
     echo "$KERNEL_DIR does not exist!"
