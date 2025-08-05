@@ -10,39 +10,6 @@
 
 This is a **custom Nethunter kernel** for the Poco F5 device specifically designed to support **Kali NetHunter**, the world's most advanced penetration testing platform for Android devices. The kernel includes comprehensive security and penetration testing features required for NetHunter functionality.
 
-## 🔧 Features
-
-### ✅ Core Features (VERIFIED WORKING)
-- **✅ NetHunter Support**: Full compatibility with Kali NetHunter
-- **✅ Custom Kernel**: Based on Linux kernel with custom modifications
-- **✅ Security Tools**: Enhanced security features for penetration testing
-- **✅ Performance Optimizations**: Optimized for both performance and battery life
-- **✅ Stable Boot**: Successfully tested and booted without issues
-
-### ✅ NetHunter Specific Features (ALL WORKING)
-- **✅ HID Attacks**: USB HID device emulation
-- **✅ Bad USB**: USB attack vector support
-- **✅ WiFi Attacks**: Enhanced WiFi penetration testing capabilities
-  - Wireless configuration and MAC80211 stack
-  - Legacy wireless tools support
-  - Support for major USB WiFi adapters (Atheros, MediaTek, Realtek, ZyDAS)
-- **✅ Bluetooth Attacks**: Bluetooth security testing features
-  - Bluetooth USB and UART adapter support
-  - RFCOMM protocol support
-  - Bluetooth Network Protocol (BNEP)
-  - Bluetooth High Speed (HS) support
-  - LED and debugging support
-- **✅ SDR Support**: Software Defined Radio capabilities
-  - USB subsystem support
-  - USB common functions
-  - USB host controller support
-- **✅ Ethernet Support**: Wired network capabilities
-  - Ethernet support
-  - Realtek vendor support
-  - Realtek RTL8169 ethernet driver
-- **✅ Chroot Support**: Linux environment support
-- **✅ Custom Modules**: Additional kernel modules for security testing
-
 ## 📋 Requirements
 
 - **Android Version**: Android 13+ (AOSP/LineageOS)
