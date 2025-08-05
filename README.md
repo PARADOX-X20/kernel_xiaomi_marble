@@ -86,8 +86,8 @@ Use the provided `build.sh` script for easy compilation:
 
 ```bash
 # Clone the repository
-git clone https://github.com/PARADOX-X20/poco-f5-kernel.git
-cd poco-f5-kernel
+git clone https://github.com/PARADOX-X20/kernel_xiaomi_marble.git
+cd kernel_xiaomi_marble
 
 # Make build script executable
 chmod +x build.sh
@@ -116,8 +116,8 @@ For advanced users who want to build manually:
 
 ```bash
 # Clone the repository
-git clone https://github.com/PARADOX-X20/poco-f5-kernel.git
-cd poco-f5-kernel
+git clone https://github.com/PARADOX-X20/kernel_xiaomi_marble.git
+cd kernel_xiaomi_marble
 
 # Set up build environment
 export ARCH=arm64
