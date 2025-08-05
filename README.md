@@ -147,15 +147,6 @@ make -j$(nproc)
 - The maintainer is not responsible for any damage to your device
 - Always backup your data before flashing custom kernels
 
-## 📄 License
-
-This project is licensed under the GPL v2 License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **Kali NetHunter Team**: For the amazing penetration testing platform
-- **Community**: All contributors and testers
-
 ---
 
 **✅ STATUS**: This kernel is **FULLY FUNCTIONAL** and has been successfully tested on Poco F5. All Nethunter features are working properly.
