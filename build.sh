@@ -16,7 +16,7 @@ PREBUILTS_DIR="$KP_ROOT/prebuilts/kernel-build-tools/linux-x86"
 DO_CLEAN=false
 NO_LTO=false
 ONLY_CONFIG=false
-TARGET=sm8450
+TARGET=marble
 DTB_WILDCARD="*"
 DTBO_WILDCARD="*"
 
